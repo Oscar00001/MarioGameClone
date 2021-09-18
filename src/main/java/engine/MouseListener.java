@@ -27,6 +27,14 @@ public class MouseListener {
         }
         return MouseListener.instance;
     }
+
+    /**
+     * mousePosition is gong to get all of the y,x, and last x & y
+     *
+     * @param window
+     * @param xpos
+     * @param ypos
+     */
     public static void mousePosCallback(long window, double xpos, double ypos){
         get().xPos = get().xPos;
         get().lastX = get().lastX;
@@ -35,6 +43,13 @@ public class MouseListener {
         get().isDragging = get().mouseButtonPressed[0] || get().mouseButtonPressed[1] || get().mouseButtonPressed[2];
     }
 
+    /**
+     * will check if the button is pressed or released 
+     * @param window
+     * @param button
+     * @param action
+     * @param mods
+     */
     public static void mouseButtonCallback (long window, int button, int action, int mods){
         if(action == GLFW_PRESS){
             if(button < get().mouseButtonPressed.length){
