@@ -4,6 +4,7 @@ import org.lwjgl.Version;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL;
+import util.Time;
 
 //import static java.sql.Types.NULL;
 import static org.lwjgl.glfw.Callbacks.glfwFreeCallbacks;
@@ -15,9 +16,12 @@ public class Window {
     int width, height;
     String title;
     private static Window window = null;
+//    private static int currentScene = -1;
+    private static Scene currentScene;
     private long glfwWindow; //memory adress where the window is in the mem space
-    private float r,g,b,a;
+    public  float r,g,b,a;
     private boolean fadeToBlack = false;
+
     private Window(){
         this.width = 1920;
         this.height = 1080;
@@ -26,6 +30,21 @@ public class Window {
         this.b = 1;
         this.g = 1;
         this.a = 1;
+    }
+
+    public static void changeScene(int newScene){
+        switch (newScene){
+            case 0:
+                currentScene = new LevelEditorScene();
+                break;
+            case 1:
+                currentScene = new LevelScene();
+                break;
+            default:
+                assert false: "This is wong" +newScene;
+                break;
+        }
+
     }
     public static Window get() {
         if(Window.window == null){
@@ -44,6 +63,7 @@ public class Window {
 
         //terminate GLFW and free error callbacks
         glfwTerminate();
+//        glfwSetErrorCallback(null).free();
         glfwSetErrorCallback(null).free();
     }
 
@@ -60,6 +80,7 @@ public class Window {
         glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
         glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
         glfwWindowHint(GLFW_MAXIMIZED, GLFW_TRUE);
+        //create window
         glfwWindow = glfwCreateWindow(this.width,this.height,this.title,NULL, NULL);
         if(glfwWindow == NULL) {
             throw new IllegalStateException("Failed GLFW Window");
@@ -77,30 +98,27 @@ public class Window {
         glfwShowWindow(glfwWindow);
         //create context
         GL.createCapabilities();
+        Window.changeScene(0);
     }
 
     public void loop(){
+        float beginTime = Time.getTime();
+        float endTime;
+        float dt = 1.0f;
         while (!glfwWindowShouldClose(glfwWindow)){
             glfwPollEvents();
-
             glClearColor(this.r,this.g,this.b,this.a);
             //            glClearColor(1.0f,0.0f,0.0f,1.0);
 //            glClear(GL_COLOR_BUFFER_BIT);
 //
             glClear(GL_COLOR_BUFFER_BIT);
+            if (dt >= 0){
+                currentScene.update(dt);
+            }
             glfwSwapBuffers(glfwWindow);
-
-            if(fadeToBlack){
-                this.r = Math.max(this.r - 0.01f,0);
-                this.g = Math.max(this.g - 0.01f,0);
-                this.b = Math.max (this.b - 0.01f,0);
-//                this.a = Math.max(this.a - 0.1f,0);
-                System.out.println("The r is ==" + r);
-            }
-            if (KeyListener.isKeyPressed(GLFW_KEY_SPACE)){
-                System.out.println("GFKJKJLSFSDKLJFH");
-                fadeToBlack = true;
-            }
+            endTime = Time.getTime();
+            dt = (float) (endTime - beginTime);
+            beginTime = endTime;
         }
     }
 }
