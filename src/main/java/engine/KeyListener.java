@@ -19,7 +19,6 @@ public class KeyListener {
         return KeyListener.keyInstance;
     }
     /**
-     *
      * @param window = the window in mem
      * @param key = the key presed
      * @param scanCode = the
