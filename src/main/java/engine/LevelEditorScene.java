@@ -1,6 +1,7 @@
 package engine;
 
 import org.lwjgl.BufferUtils;
+import renderer.Shader;
 
 import java.awt.event.KeyEvent;
 import java.nio.FloatBuffer;
@@ -11,23 +12,6 @@ import static org.lwjgl.opengl.GL30.glBindVertexArray;
 import static org.lwjgl.opengl.GL30.glGenVertexArrays;
 
 public class LevelEditorScene extends Scene {
-    private String vertexShaderSrc ="#version 330 core\n" +
-            "layout(location=0) in vec3 aPos;\n" +
-            "layout (location=1) in vec4 aColor;\n" +
-            "\n" +
-            "out vec4 fColor;\n" +
-            "void main () {\n" +
-            "    fColor = aColor;\n" +
-            "    gl_Position = vec4(aPos,1.0);\n" +
-            "}";
-    private String fragmentShaderSrc = "#version 330 core\n" +
-            "\n" +
-            "in vec4 fColor;\n" +
-            "out vec4 color;\n" +
-            "\n" +
-            "void main(){\n" +
-            "    color = fColor;\n" +
-            "}";
 
     private int vertexID,fragmentID,shaderProgram;
     private float[] vertexArray = {
@@ -53,54 +37,14 @@ public class LevelEditorScene extends Scene {
     };
     private int vaoID, vboID, eboID;
 
+    private Shader defaultShader;
     public LevelEditorScene() {
-
     }
 
     @Override
     public void init(){
-        //Compile and link the shaders
-        //load and compile the vertex shader
-        vertexID = glCreateShader(GL_VERTEX_SHADER);
-        //pass the shader source to the GPU
-        glShaderSource(vertexID,vertexShaderSrc);
-        glCompileShader(vertexID);
-        ///check for the erros
-        int success = glGetShaderi(vertexID,GL_COMPILE_STATUS);
-        if (success == GL_FALSE){
-            int len = glGetShaderi(vertexID,GL_INFO_LOG_LENGTH);
-            System.out.println("Error: 'defaultShader.glsl',\n \t  Vertex shader compilation failed");
-            System.out.println(glGetShaderInfoLog(vertexID,len));
-            assert false: "";
-        }
-        //Compile and link the shaders
-        //load and compile the vertex shader
-        fragmentID = glCreateShader(GL_FRAGMENT_SHADER);
-        //pass the shader source to the GPU
-        glShaderSource(fragmentID,fragmentShaderSrc);
-        glCompileShader(fragmentID);
-        ///check for the erros
-        success = glGetShaderi(fragmentID,GL_COMPILE_STATUS);
-        if (success == GL_FALSE){
-            int len = glGetShaderi(fragmentID,GL_INFO_LOG_LENGTH);
-            System.out.println("Error: 'defaultShader.glsl',\n \t  Fragment shader compilation failed");
-            System.out.println(glGetShaderInfoLog(fragmentID,len));
-            assert false: "";
-        }
-
-        //create program and link shader & check for error
-        shaderProgram = glCreateProgram();
-        glAttachShader(shaderProgram,vertexID);
-        glAttachShader(shaderProgram,fragmentID);
-        glLinkProgram(shaderProgram);
-
-        success = glGetProgrami(shaderProgram,GL_LINK_STATUS);
-        if (success == GL_FALSE){
-            int len = glGetProgrami(shaderProgram,GL_INFO_LOG_LENGTH);
-            System.out.println("Error: 'defaultShader.glsl',\n \t  Linking of shader  failed");
-            System.out.println(glGetProgramInfoLog(shaderProgram,len));
-            assert false: "";
-        }
+        defaultShader = new Shader("assets/shaders/default.glsl");
+        defaultShader.compile();
         // ============================================================
         // Generate VAO, VBO, and EBO buffer objects, and send to GPU
         // ============================================================
@@ -145,7 +89,7 @@ public class LevelEditorScene extends Scene {
     public void update(float dt) {
         //=========================================Step 3=================================================
         // Bind shader program
-        glUseProgram(shaderProgram);
+        defaultShader.use();
         // Bind the VAO that we're using
         glBindVertexArray(vaoID);
 
@@ -159,8 +103,7 @@ public class LevelEditorScene extends Scene {
         glDisableVertexAttribArray(0);
         glDisableVertexAttribArray(1);
 
-        glBindVertexArray(0);
+        glBindVertexArray(0); // stop binding the voaId
 
-        glUseProgram(0);
-    }
+        defaultShader.detach();    }
 }

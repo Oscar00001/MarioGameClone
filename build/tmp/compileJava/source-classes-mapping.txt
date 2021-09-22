@@ -10,6 +10,8 @@ engine/LevelScene.java
  engine.LevelScene
 engine/Scene.java
  engine.Scene
+renderer/Shader.java
+ renderer.Shader
 engine/Window.java
  engine.Window
 engine/LevelEditorScene.java
